@@ -1,0 +1,58 @@
+﻿@page "/"
+@inject IBookData BookData
+
+
+@if (data is not null)
+{
+
+    @foreach (var item in data)
+    {
+        <div class="row">
+            <div class="col-md-6">
+                <h2>@item.Id @item.Title @item.Description</h2>
+            </div>
+            <div class="col-md-6">
+                <button class="btn btn-primary" @onclick="@(e => AddBook(item))">Add Book</button>
+                <button class="btn btn-warning" @onclick="@(e => UpdateBook(item))">Update Book</button>
+                <button class="btn btn-danger" @onclick="@(e => DeleteBook(item))">Delete Book</button>
+            </div>
+        </div>
+    }
+
+}
+
+@code{
+    private List<BookModel> data;
+
+    protected override async Task OnInitializedAsync()
+    {
+        data = await BookData.GetBooks();
+    }
+
+    private async Task AddBook(BookModel book)
+    {
+        await BookData.CreateBook(
+                new BookModel
+                {
+                    Id = data.Count + 1,
+                    Title = book.Title,
+                    Description = book.Description
+                }
+            );
+
+        data = await BookData.GetBooks();
+    }
+
+    private async Task UpdateBook(BookModel book)
+    {
+        book.Description = "Modificadion de descripcion";
+        await BookData.UpdateBook(book.Id, book);
+        data = await BookData.GetBooks();
+    }
+
+    private async Task DeleteBook(BookModel book)
+    {
+        await BookData.DeleteBook(book.Id);
+        data = await BookData.GetBooks();
+    }
+}
